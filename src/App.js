@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Component } from "react";
 import TaskList from "./TaskList";
 import noTaskImage from "./taskList.png";
 import completedTasksImage from "./completedTasks.png";
@@ -6,128 +6,144 @@ import garbageCanImage from "./garbageCan.png";
 
 // Created by: Alan Espana
 // CS 247
-// 5/10/2024
-// First React App
-const App = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState("");
+// 5/24/2024
+// First React App (class based)
 
-  const handleAddTask = () => {
-    if (newTask.trim() !== "") {
-      setTasks([...tasks, { text: newTask.trim(), checked: false }]);
-      setNewTask("");
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tasks: [],
+      newTask: "",
+    };
+  }
+
+  handleAddTask = () => {
+    if (this.state.newTask.trim() !== "") {
+      this.setState((prevState) => ({
+        tasks: [
+          ...prevState.tasks,
+          { text: this.state.newTask.trim(), checked: false },
+        ],
+        newTask: "",
+      }));
     }
   };
 
-  const handleToggleTask = (index) => {
-    const newTasks = [...tasks];
+  handleToggleTask = (index) => {
+    const newTasks = [...this.state.tasks];
     newTasks[index].checked = !newTasks[index].checked;
-    setTasks(newTasks);
+    this.setState({ tasks: newTasks });
 
     if (newTasks[index].checked) {
       setTimeout(() => {
-        handleDeleteTask(index);
+        this.handleDeleteTask(index);
       }, 4000);
     }
   };
 
-  const handleDeleteTask = (index) => {
-    const newTasks = [...tasks];
+  handleDeleteTask = (index) => {
+    const newTasks = [...this.state.tasks];
     newTasks.splice(index, 1);
-    setTasks(newTasks);
+    this.setState({ tasks: newTasks });
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleAddTask();
+  handleKeyPress = (e) => {
+    if ( e.key === "Enter") {
+      this.handleAddTask();
     }
   };
 
-  return (
-    <div className="taskListWindow">
-      <div>
-        <TaskList />
-        <input
-          className="enterBox"
-          type="text"
-          placeholder="Enter a new task"
-          value={newTask}
-          onChange={(e) => {
-            setNewTask(e.target.value);
-            // Enable or disable the button based on input value
-            const isInputEmpty = e.target.value.trim() === "";
-            const createButton = document.querySelector(".createButton");
-            if (createButton) {
-              createButton.disabled = isInputEmpty;
-            }
-          }}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              handleAddTask();
-            }
-          }}
-        />
-        <button
-          className="createButton"
-          onClick={handleAddTask}
-          style={{
-            backgroundColor: newTask ? "#00A3FF" : "#C4C4C4",
-            color: newTask ? "#FFFFFF" : "#000000",
-          }}
-          disabled={!newTask}
-        >
-          Create
-        </button>
-        <ul>
-          {tasks.map((task, index) => (
-            <li
-              key={index}
-              style={{ display: "flex" }}
-              className={task.text === newTask ? "newTask" : ""}
-            >
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <input
-                  className="checkSquare"
-                  type="checkbox"
-                  checked={task.checked}
-                  onChange={() => handleToggleTask(index)}
-                />
-                <span
-                  style={{
-                    marginRight: "10px",
-                    textDecoration: task.checked ? "line-through" : "none",
-                  }}
-                >
-                  {task.text}
-                </span>
-                <img
-                  className="garbageCan"
-                  src={garbageCanImage}
-                  alt="Delete"
-                  onClick={() => handleDeleteTask(index)}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-        {tasks.length === 0 ? (
-          <div className="imageContainer">
-            <img
-              src={completedTasksImage}
-              alt="All tasks completed"
-              className="completedTasksImage"
-            />
-            <p className="imageText">All tasks completed!</p>
-          </div>
-        ) : (
-          <div className="imageContainer">
-            <img src={noTaskImage} alt="Tasks To-Do" className="noTaskImage" />
-            <p className="imageText">Tasks To-Do.</p>
-          </div>
-        )}
-      </div>  
-    </div>
-  );
-};
+  handleInputChange = (e) => {
+    this.setState({ newTask: e.target.value });
+
+    // Enable or disable the button based on input value
+    const isInputEmpty = e.target.value.trim() === "";
+    const createButton = document.querySelector(".createButton");
+    if (createButton) {
+      createButton.disabled = isInputEmpty;
+    }
+  };
+
+  render() {
+    return (
+      <div className="taskListWindow">
+        <div>
+          <TaskList />
+          <input
+            className="enterBox"
+            type="text"
+            placeholder="Enter a new task"
+            value={this.state.newTask}
+            onChange={this.handleInputChange}
+            onKeyPress={this.handleKeyPress}
+          />
+          <button
+            className="createButton"
+            onClick={this.handleAddTask}
+            style={{
+              backgroundColor: this.state.newTask ? "#00A3FF" : "#C4C4C4",
+              color: this.state.newTask ? "#FFFFFF" : "#000000",
+            }}
+            disabled={!this.state.newTask}
+          >
+            Create
+          </button>
+          <ul>
+            {this.state.tasks.map((task, index) => (
+              <li
+                key={index}
+                style={{ display: "flex" }}
+                className={task.text === this.state.newTask ? "newTask" : ""}
+              >
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <input
+                    className="checkSquare"
+                    type="checkbox"
+                    checked={task.checked}
+                    onChange={() => this.handleToggleTask(index)}
+                  />
+                  <span
+                    style={{
+                      marginRight: "10px",
+                      textDecoration: task.checked ? "line-through" : "none",
+                    }}
+                  >
+                    {task.text}
+                  </span>
+                  <img
+                    className="garbageCan"
+                    src={garbageCanImage}
+                    alt="Delete"
+                    onClick={() => this.handleDeleteTask(index)}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+          {this.state.tasks.length === 0 ? (
+            <div className="imageContainer">
+              <img
+                src={completedTasksImage}
+                alt="All tasks completed"
+                className="completedTasksImage"
+              />
+              <p className="imageText">All tasks completed!</p>
+            </div>
+          ) : (
+            <div className="imageContainer">
+              <img
+                src={noTaskImage}
+                alt="Tasks To-Do"
+                className="noTaskImage"
+              />
+              <p className="imageText">Tasks To-Do.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+}
 
 export default App;
